@@ -399,7 +399,7 @@ function startGravityMode() {
   // convertemos, em uma segunda etapa separada.
   const toConvert = []; // { el, rect } — só o que realmente estava na tela
 
-  const wholeSelector = 'a, button, img:not(.page-character), .status-badge, .gallery-item, .season-banner, .music-player';
+  const wholeSelector = 'a, button, img:not(.page-character), .status-badge, .gallery-item, .season-banner, .music-player, .divider';
   let wholeCandidates = Array.from(document.querySelectorAll(wholeSelector));
   wholeCandidates = wholeCandidates.filter((el) => !wholeCandidates.some((other) => other !== el && other.contains(el)));
 
@@ -412,7 +412,7 @@ function startGravityMode() {
     toConvert.push({ el, rect });
   });
 
-  const textSelector = 'h1, h2, .commission-heading, p, li, .price-tier-name, .price-tier-value';
+  const textSelector = 'h1, h2, .commission-heading, p, li, .price-tier-name, .price-tier-value, .commission-price';
   let textCandidates = Array.from(document.querySelectorAll(textSelector));
   textCandidates = textCandidates.filter((el) => !wholeCandidates.some((w) => w.contains(el)));
   textCandidates = textCandidates.filter((el) => !textCandidates.some((other) => other !== el && other.contains(el)));
