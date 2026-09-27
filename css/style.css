@@ -297,6 +297,46 @@ body.season-christmas{ --sparkle-color:#8fe3a1; }
 .ych-panel{ display:none; }
 .ych-panel.active{ display:block; }
 
+/* Terminal que aparece depois do personagem se desintegrar */
+.konami-terminal{
+  margin-top:18px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:min(280px, 80vw);
+  background:rgba(20,8,10,0.6);
+  border:1px solid rgba(255,255,255,0.25);
+  border-radius:10px;
+  padding:10px 14px;
+  font-family:'Courier New', monospace;
+  opacity:0;
+  transform:translateY(-8px);
+  transition:opacity 0.3s ease, transform 0.3s ease;
+  z-index:6;
+}
+.konami-terminal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+.konami-terminal-prompt{
+  color:#7fd88a;
+  font-weight:bold;
+}
+.konami-terminal-input{
+  flex:1;
+  min-width:0;
+  background:transparent;
+  border:none;
+  outline:none;
+  color:#fff;
+  font-family:inherit;
+  font-size:0.9rem;
+  caret-color:#7fd88a;
+}
+.konami-terminal-input::placeholder{
+  color:rgba(255,255,255,0.45);
+}
+
 .konami-toast{
   position:fixed;
   top:50%;
