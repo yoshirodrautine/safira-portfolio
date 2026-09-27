@@ -67,6 +67,10 @@ img{
   user-drag:none;
   -webkit-touch-callout:none; }
 
+html{
+  cursor: url("../img/cursor.png") 6 6, auto;
+}
+
 body{
   font-family:'Poppins', sans-serif;
   color:var(--texto-escuro);
