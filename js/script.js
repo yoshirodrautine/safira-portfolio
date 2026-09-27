@@ -363,7 +363,6 @@ function startGravityMode() {
       el.style.width = '100%';
       el.style.height = '100%';
       el.style.margin = '0';
-      el.style.cursor = 'grab';
       physicsTarget = wrapper;
     } else {
       el.style.position = 'fixed';
@@ -373,8 +372,17 @@ function startGravityMode() {
       el.style.margin = '0';
       el.style.zIndex = '9998';
       el.style.transition = 'none';
-      el.style.cursor = 'grab';
       el.style.willChange = 'transform';
+
+      // campos de formulário (select, input, textarea) têm
+      // comportamento nativo (abrir menu suspenso, editar texto) que
+      // não passa pelo bloqueio de clique — desativa isso aqui, sem
+      // atrapalhar o arrasto, que o Matter já detecta pela posição
+      // do corpo físico e não pelo elemento em si
+      const tag = el.tagName;
+      if (tag === 'SELECT' || tag === 'INPUT' || tag === 'TEXTAREA') {
+        el.style.pointerEvents = 'none';
+      }
     }
 
     const cx = rect.left + rect.width / 2;
