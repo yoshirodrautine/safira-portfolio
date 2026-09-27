@@ -329,7 +329,7 @@ function startGravityMode() {
   engine.gravity.y = 0; // gravidade do espaço — desligada de vez
 
   const world = engine.world;
-  const wallThickness = 60;
+  const wallThickness = 300; // grossa o bastante pra ninguém escapar em colisões fortes
   const wallOptions = { isStatic: true, restitution: 0.6 };
   World.add(world, [
     Bodies.rectangle(vw0 / 2, -wallThickness / 2, vw0 + wallThickness * 2, wallThickness, wallOptions),
@@ -399,7 +399,7 @@ function startGravityMode() {
   // convertemos, em uma segunda etapa separada.
   const toConvert = []; // { el, rect } — só o que realmente estava na tela
 
-  const wholeSelector = 'a, button, img:not(.page-character), .status-badge, .gallery-item, .season-banner, .music-player, .divider';
+  const wholeSelector = 'a, button, img:not(.page-character), .status-badge, .gallery-item, .season-banner, .music-player, .divider, .order-row, input, select, textarea, label';
   let wholeCandidates = Array.from(document.querySelectorAll(wholeSelector));
   wholeCandidates = wholeCandidates.filter((el) => !wholeCandidates.some((other) => other !== el && other.contains(el)));
 
@@ -477,6 +477,8 @@ function startGravityMode() {
   }, true);
 
   let lastTime = performance.now();
+  const MAX_SPEED = 25; // trava a velocidade máxima pra nunca atravessar a parede
+
   function tick(now) {
     if (!document.body.classList.contains('gravity-active')) return;
     const delta = Math.min(now - lastTime, 33);
@@ -484,6 +486,11 @@ function startGravityMode() {
     Engine.update(engine, delta);
 
     pairs.forEach(({ el, body, w, h }) => {
+      const speed = Math.hypot(body.velocity.x, body.velocity.y);
+      if (speed > MAX_SPEED) {
+        const scale = MAX_SPEED / speed;
+        Body.setVelocity(body, { x: body.velocity.x * scale, y: body.velocity.y * scale });
+      }
       el.style.transform = `translate(${body.position.x - w / 2}px, ${body.position.y - h / 2}px) rotate(${body.angle}rad)`;
     });
 
@@ -651,9 +658,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('contextmenu', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
+  // durante o modo gravidade, bloqueia o menu de botão direito em
+  // QUALQUER elemento — não só imagem — pra não interromper o
+  // arrasto da física no meio de uma colisão
+  if (document.body.classList.contains('gravity-active')) e.preventDefault();
 });
 document.addEventListener('dragstart', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
+  // bloqueia SEMPRE o arrastar nativo de links (não só durante o
+  // modo gravidade) — sem isso, o navegador mostra o "fantasma" com
+  // o link e prende o cursor nesse arrasto próprio dele, que também
+  // pode acabar sendo solto/aberto em outra página
+  if (e.target.tagName === 'A' || e.target.closest('a')) e.preventDefault();
 });
 
 document.addEventListener('DOMContentLoaded', () => {
