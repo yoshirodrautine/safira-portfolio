@@ -48,6 +48,7 @@ const I18N = {
   'season.halloween': { pt: '🎃 Clima de Halloween por aqui!', en: '🎃 Halloween vibes around here!' },
   'season.christmas': { pt: '🎄 Boas festas! Feliz Natal!', en: '🎄 Happy holidays!' },
   'konami.msg': { pt: '✨ Código secreto ativado! Você é demais! ✨', en: "✨ Secret code activated! You're awesome! ✨" },
+  'konami.placeholder': { pt: 'digite o código secreto...', en: 'type the secret code...' },
 
   'nav.back': { pt: '← Voltar', en: '← Back' },
   'nav.top': { pt: 'Voltar ao topo', en: 'Back to top' },
@@ -268,34 +269,67 @@ document.addEventListener('DOMContentLoaded', () => {
       progress = key === KONAMI[0] ? 1 : 0;
     }
   });
-
-  function triggerKonami() {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    if (!reduceMotion) {
-      burstConfetti(window.innerWidth / 2, window.innerHeight / 2, 60);
-      burstConfetti(window.innerWidth * 0.2, window.innerHeight * 0.3, 30);
-      burstConfetti(window.innerWidth * 0.8, window.innerHeight * 0.3, 30);
-    }
-
-    let lang = 'pt';
-    try { lang = localStorage.getItem('siteLang') || 'pt'; } catch (err) {}
-
-    const toast = document.createElement('div');
-    toast.className = 'konami-toast';
-    toast.textContent = I18N['konami.msg'][lang];
-    document.body.appendChild(toast);
-    requestAnimationFrame(() => toast.classList.add('visible'));
-    setTimeout(() => {
-      toast.classList.remove('visible');
-      setTimeout(() => toast.remove(), 400);
-    }, 2600);
-
-    if (!reduceMotion) {
-      setTimeout(() => loadMatterJS(startGravityMode), 500);
-    }
-  }
 });
+
+// Terminal que aparece depois do personagem se desintegrar — dá pra
+// ativar o código Konami digitando a palavra "konami" nele, já que
+// celular não tem as setas do teclado. Focar o campo (que acontece
+// automaticamente aqui, dentro do próprio toque do usuário) já abre
+// o teclado virtual sozinho.
+function showKonamiTerminal(hero) {
+  let lang = 'pt';
+  try { lang = localStorage.getItem('siteLang') || 'pt'; } catch (err) {}
+
+  const terminal = document.createElement('div');
+  terminal.className = 'konami-terminal';
+  terminal.innerHTML = `
+    <span class="konami-terminal-prompt">&gt;</span>
+    <input type="text" class="konami-terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">
+  `;
+  hero.appendChild(terminal);
+
+  const input = terminal.querySelector('.konami-terminal-input');
+  input.placeholder = I18N['konami.placeholder'][lang];
+
+  requestAnimationFrame(() => terminal.classList.add('visible'));
+
+  input.addEventListener('input', () => {
+    if (input.value.trim().toLowerCase() === 'konami') {
+      terminal.classList.remove('visible');
+      setTimeout(() => terminal.remove(), 300);
+      triggerKonami();
+    }
+  });
+
+  input.focus();
+}
+
+function triggerKonami() {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!reduceMotion) {
+    burstConfetti(window.innerWidth / 2, window.innerHeight / 2, 60);
+    burstConfetti(window.innerWidth * 0.2, window.innerHeight * 0.3, 30);
+    burstConfetti(window.innerWidth * 0.8, window.innerHeight * 0.3, 30);
+  }
+
+  let lang = 'pt';
+  try { lang = localStorage.getItem('siteLang') || 'pt'; } catch (err) {}
+
+  const toast = document.createElement('div');
+  toast.className = 'konami-toast';
+  toast.textContent = I18N['konami.msg'][lang];
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('visible'));
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 2600);
+
+  if (!reduceMotion) {
+    setTimeout(() => loadMatterJS(startGravityMode), 500);
+  }
+}
 
 function loadMatterJS(callback) {
   if (window.Matter) { callback(); return; }
@@ -926,6 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clickCount >= DISINTEGRATE_AT) {
       gone = true;
       disintegrate(heroImg, hero);
+      showKonamiTerminal(hero);
     }
   });
 
