@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // celular não tem as setas do teclado. Focar o campo (que acontece
 // automaticamente aqui, dentro do próprio toque do usuário) já abre
 // o teclado virtual sozinho.
-function showKonamiTerminal(hero) {
+function showKonamiTerminal(heroImg) {
   let lang = 'pt';
   try { lang = localStorage.getItem('siteLang') || 'pt'; } catch (err) {}
 
@@ -286,7 +286,8 @@ function showKonamiTerminal(hero) {
     <span class="konami-terminal-prompt">&gt;</span>
     <input type="text" class="konami-terminal-input" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text">
   `;
-  hero.appendChild(terminal);
+  // logo depois do personagem no HTML, não no fim da página
+  heroImg.insertAdjacentElement('afterend', terminal);
 
   const input = terminal.querySelector('.konami-terminal-input');
   input.placeholder = I18N['konami.placeholder'][lang];
@@ -295,8 +296,6 @@ function showKonamiTerminal(hero) {
 
   input.addEventListener('input', () => {
     if (input.value.trim().toLowerCase() === 'konami') {
-      terminal.classList.remove('visible');
-      setTimeout(() => terminal.remove(), 300);
       triggerKonami();
     }
   });
@@ -306,6 +305,16 @@ function showKonamiTerminal(hero) {
 
 function triggerKonami() {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // o terminal some assim que o código roda, não importa se foi
+  // digitando nele ou pelas setas — e o campo perde o foco, o que
+  // fecha o teclado virtual no celular (com o teclado aberto a área
+  // visível encolhe e a física mediria o tamanho da tela errado)
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  document.querySelectorAll('.konami-terminal').forEach((terminal) => {
+    terminal.classList.remove('visible');
+    setTimeout(() => terminal.remove(), 300);
+  });
 
   if (!reduceMotion) {
     burstConfetti(window.innerWidth / 2, window.innerHeight / 2, 60);
@@ -346,6 +355,8 @@ function startGravityMode() {
   document.body.classList.add('gravity-active');
   document.body.style.overflow = 'hidden';
   document.documentElement.style.overflow = 'hidden';
+
+  document.querySelectorAll('.konami-terminal').forEach((terminal) => terminal.remove());
 
   const { Engine, World, Bodies, Body, Mouse, MouseConstraint } = Matter;
 
@@ -441,7 +452,7 @@ function startGravityMode() {
   // convertemos, em uma segunda etapa separada.
   const toConvert = []; // { el, rect } — só o que realmente estava na tela
 
-  const wholeSelector = 'a, button, img:not(.page-character), .status-badge, .gallery-item, .season-banner, .music-player, .divider, .order-row, input, select, textarea, label';
+  const wholeSelector = 'a, button, img:not(.page-character):not(.is-gone), .status-badge, .gallery-item, .season-banner, .music-player, .divider, .order-row, input, select, textarea, label';
   let wholeCandidates = Array.from(document.querySelectorAll(wholeSelector));
   wholeCandidates = wholeCandidates.filter((el) => !wholeCandidates.some((other) => other !== el && other.contains(el)));
 
@@ -960,7 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clickCount >= DISINTEGRATE_AT) {
       gone = true;
       disintegrate(heroImg, hero);
-      showKonamiTerminal(hero);
+      showKonamiTerminal(heroImg);
     }
   });
 
@@ -1013,6 +1024,12 @@ function disintegrate(img, hero) {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const w = img.offsetWidth;
   const h = img.offsetHeight;
+
+  // a imagem continua no HTML (invisível, guardando o espaço no layout),
+  // mas marcada como "sumida": não recebe mais clique/toque e o modo
+  // gravidade do Konami ignora ela, em vez de tratá-la como um objeto
+  // físico fantasma que ficaria colidindo com tudo sem ninguém ver
+  img.classList.add('is-gone');
 
   if (reduceMotion || !w || !h) {
     img.style.transition = 'opacity 0.6s ease';
