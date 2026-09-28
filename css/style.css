@@ -297,6 +297,10 @@ body.season-christmas{ --sparkle-color:#8fe3a1; }
 .ych-panel{ display:none; }
 .ych-panel.active{ display:block; }
 
+.hero-img.is-gone{
+  pointer-events:none;
+}
+
 /* Terminal que aparece depois do personagem se desintegrar */
 .konami-terminal{
   margin-top:18px;
