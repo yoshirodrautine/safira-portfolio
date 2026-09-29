@@ -303,6 +303,49 @@ function showKonamiTerminal(heroImg) {
   input.focus();
 }
 
+// ===== ADORNOS NOS BOTÕES =====
+// Lê window.SITE_DECORATIONS (definido em js/decorations-config.js,
+// que é o arquivo feito pra VOCÊ editar) e coloca cada imagem no
+// canto do botão indicado. Cuida sozinho do caminho da imagem
+// (index.html x páginas dentro de pages/) e de janelas sazonais.
+document.addEventListener('DOMContentLoaded', () => {
+  const list = window.SITE_DECORATIONS;
+  if (!Array.isArray(list) || !list.length) return;
+
+  const siteRoot = location.pathname.includes('/pages/') ? '../' : '';
+
+  function isWithinSeason(start, end) {
+    if (!start || !end) return true; // sem datas = sempre ativo
+    const now = new Date();
+    const [sm, sd] = start.split('-').map(Number);
+    const [em, ed] = end.split('-').map(Number);
+    const toDays = (m, d) => m * 31 + d; // aproximação simples, mesmo padrão usado no banner sazonal
+    const today = toDays(now.getMonth() + 1, now.getDate());
+    const from = toDays(sm, sd);
+    const to = toDays(em, ed);
+    return from <= to ? (today >= from && today <= to) : (today >= from || today <= to);
+  }
+
+  list.forEach((deco) => {
+    if (!deco || !deco.image || !deco.target) return;
+    if (!isWithinSeason(deco.start, deco.end)) return;
+
+    document.querySelectorAll(deco.target).forEach((el) => {
+      el.style.position = el.style.position || 'relative';
+
+      const badge = document.createElement('img');
+      badge.src = siteRoot + deco.image;
+      badge.className = `decoration-badge pos-${deco.position || 'top-right'}`;
+      badge.style.width = `${deco.size || 40}px`;
+      badge.alt = '';
+      badge.setAttribute('aria-hidden', 'true');
+      badge.onerror = () => badge.remove(); // imagem não encontrada: some sem quebrar nada
+
+      el.appendChild(badge);
+    });
+  });
+});
+
 function triggerKonami() {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
