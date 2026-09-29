@@ -297,6 +297,19 @@ body.season-christmas{ --sparkle-color:#8fe3a1; }
 .ych-panel{ display:none; }
 .ych-panel.active{ display:block; }
 
+/* ===== ADORNOS NOS BOTÕES ===== */
+.decoration-badge{
+  position:absolute;
+  height:auto;
+  pointer-events:none;
+  z-index:5;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+}
+.decoration-badge.pos-top-right{ top:-14px; right:-14px; }
+.decoration-badge.pos-top-left{ top:-14px; left:-14px; }
+.decoration-badge.pos-bottom-right{ bottom:-14px; right:-14px; }
+.decoration-badge.pos-bottom-left{ bottom:-14px; left:-14px; }
+
 .hero-img.is-gone{
   pointer-events:none;
 }
