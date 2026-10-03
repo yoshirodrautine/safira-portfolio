@@ -48,7 +48,7 @@ const I18N = {
   'season.halloween': { pt: '🎃 Clima de Halloween por aqui!', en: '🎃 Halloween vibes around here!' },
   'season.christmas': { pt: '🎄 Boas festas! Feliz Natal!', en: '🎄 Happy holidays!' },
   'konami.msg': { pt: '✨ Código secreto ativado! Você é demais! ✨', en: "✨ Secret code activated! You're awesome! ✨" },
-  'konami.placeholder': { pt: 'digite o código secreto...', en: 'type the secret code...' },
+  'konami.placeholder': { pt: 'digite o comando secreto...', en: 'type the secret command...' },
 
   'nav.back': { pt: '← Voltar', en: '← Back' },
   'nav.top': { pt: 'Voltar ao topo', en: 'Back to top' },
@@ -295,7 +295,7 @@ function showKonamiTerminal(heroImg) {
   requestAnimationFrame(() => terminal.classList.add('visible'));
 
   input.addEventListener('input', () => {
-    if (input.value.trim().toLowerCase() === 'konami') {
+    if (input.value.trim().toLowerCase() === 'gravity') {
       triggerKonami();
     }
   });
@@ -774,6 +774,79 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ===== PARTÍCULAS DE FUNDO (particles.js) =====
+// Substitui as 20 estrelinhas fixas em CSS por um campo de
+// partículas de verdade, com leve constelação entre elas —
+// combina com o céu estrelado do fundo pixel art.
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('particlesBg');
+  if (!container || typeof particlesJS === 'undefined') return;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let particleColor = '#ffffff';
+  if (document.body.classList.contains('season-halloween')) particleColor = '#ff9d3d';
+  else if (document.body.classList.contains('season-christmas')) particleColor = '#8fe3a1';
+
+  particlesJS('particlesBg', {
+    particles: {
+      number: { value: 26, density: { enable: true, value_area: 800 } },
+      color: { value: particleColor },
+      shape: { type: 'circle' },
+      opacity: {
+        value: 0.55,
+        random: true,
+        anim: { enable: !reduceMotion, speed: 0.5, opacity_min: 0.1, sync: false },
+      },
+      size: { value: 2.6, random: true },
+      line_linked: { enable: true, distance: 140, color: particleColor, opacity: 0.12, width: 1 },
+      move: {
+        enable: !reduceMotion,
+        speed: 0.5,
+        direction: 'none',
+        random: true,
+        straight: false,
+        out_mode: 'out',
+        bounce: false,
+      },
+    },
+    interactivity: {
+      detect_on: 'canvas',
+      events: {
+        onhover: { enable: !reduceMotion, mode: 'grab' },
+        onclick: { enable: false },
+        resize: true,
+      },
+      modes: { grab: { distance: 140, line_linked: { opacity: 0.35 } } },
+    },
+    retina_detect: true,
+  });
+});
+
+// ===== REVELAR AO ROLAR A PÁGINA (Comissões e TOS) =====
+// Em vez de tudo já "pronto" quando a página carrega, cada seção
+// só começa a aparecer quando entra na tela.
+document.addEventListener('DOMContentLoaded', () => {
+  const sections = document.querySelectorAll('.category-block, .commission-block');
+  if (!sections.length) return;
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    sections.forEach((el) => el.classList.add('in-view'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+
+  sections.forEach((el) => observer.observe(el));
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const musicToggle = document.getElementById('musicToggle');
   const musicPanel = document.getElementById('musicPanel');
@@ -968,22 +1041,40 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ===== HOVER 3D NA GALERIA (AtroposJS) =====
+// Cada imagem é envolvida na estrutura que o Atropos exige
+// (atropos > atropos-scale > atropos-rotate > atropos-inner) e
+// vira um card com parallax/brilho ao passar o mouse ou tocar.
 document.addEventListener('DOMContentLoaded', () => {
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) return;
+  if (typeof Atropos === 'undefined') return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   document.querySelectorAll('.gallery-item').forEach((item) => {
-    item.addEventListener('mousemove', (e) => {
-      const rect = item.getBoundingClientRect();
-      const px = (e.clientX - rect.left) / rect.width;
-      const py = (e.clientY - rect.top) / rect.height;
-      const rotateY = (px - 0.5) * 12;
-      const rotateX = (0.5 - py) * 12;
-      item.style.transform = `perspective(700px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
-    });
+    const img = item.querySelector('img');
+    if (!img) return;
 
-    item.addEventListener('mouseleave', () => {
-      item.style.transform = '';
+    const atropos = document.createElement('div');
+    atropos.className = 'atropos gallery-atropos';
+    const scale = document.createElement('div');
+    scale.className = 'atropos-scale';
+    const rotate = document.createElement('div');
+    rotate.className = 'atropos-rotate';
+    const inner = document.createElement('div');
+    inner.className = 'atropos-inner';
+
+    item.insertBefore(atropos, img);
+    atropos.appendChild(scale);
+    scale.appendChild(rotate);
+    rotate.appendChild(inner);
+    inner.appendChild(img);
+
+    Atropos({
+      el: atropos,
+      shadow: false,
+      highlight: true,
+      rotateXMax: 12,
+      rotateYMax: 12,
+      activeOffset: 20,
     });
   });
 });
