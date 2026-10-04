@@ -752,13 +752,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-document.addEventListener('contextmenu', (e) => {
-  if (e.target.tagName === 'IMG') e.preventDefault();
-  // durante o modo gravidade, bloqueia o menu de botão direito em
-  // QUALQUER elemento — não só imagem — pra não interromper o
-  // arrasto da física no meio de uma colisão
-  if (document.body.classList.contains('gravity-active')) e.preventDefault();
-});
+// bloqueia o clique direito (menu de contexto) em qualquer lugar da
+// página, sempre — não só em imagens ou durante o modo gravidade
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 document.addEventListener('dragstart', (e) => {
   if (e.target.tagName === 'IMG') e.preventDefault();
   // bloqueia SEMPRE o arrastar nativo de links (não só durante o
@@ -1006,9 +1002,15 @@ document.addEventListener('DOMContentLoaded', () => {
     lightboxImg.src = '';
   }
 
-  document.querySelectorAll('.gallery-item img').forEach((img) => {
-    if (img.classList.contains('img-missing')) return;
-    img.addEventListener('click', () => openLightbox(img.currentSrc || img.src, img.alt));
+  // delegado no .gallery-item (não no <img> direto) — o Atropos
+  // envolve a imagem em várias camadas próprias, e ouvir só no
+  // container de fora continua funcionando independente disso
+  document.querySelectorAll('.gallery-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      const img = item.querySelector('img');
+      if (!img || img.classList.contains('img-missing')) return;
+      openLightbox(img.currentSrc || img.src, img.alt);
+    });
   });
 
   closeBtn.addEventListener('click', closeLightbox);
