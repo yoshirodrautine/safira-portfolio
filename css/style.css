@@ -802,11 +802,6 @@ body.page-fade.page-out{ opacity:0; }
   border-radius:14px;
   overflow:hidden;
   background:var(--gallery-item-bg);
-  border:1px solid var(--gallery-item-border);
-  
-    transition:transform 0.15s ease;
-  transform-style:preserve-3d;
-  will-change:transform;
 }
 
 .gallery-item.is-loading{
@@ -851,6 +846,12 @@ body.page-fade.page-out{ opacity:0; }
 .gallery-atropos .atropos-inner{
   width:100%;
   height:100%;
+}
+
+.gallery-atropos,
+.gallery-atropos .atropos-inner{
+  border-radius:14px;
+  overflow:hidden;
 }
 
 .gallery-item img.img-missing{
