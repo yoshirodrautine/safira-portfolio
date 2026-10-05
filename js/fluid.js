@@ -1,8 +1,7 @@
 import * as TweakpaneModule from 'https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js';
 import GPU from 'https://esm.sh/gpu.js';
 
-// ===== CONFIGURAÇÃO BÁSICA =====
-const GRID = 512; // resolução interna da simulação (não é o tamanho da tela)
+const GRID = 512;
 const canvas = document.getElementById('fluidCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = true;
@@ -19,7 +18,6 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-// ===== PARÂMETROS AJUSTÁVEIS (pelo Tweakpane) =====
 const params = {
   velocityDissipation: 0.992,
   dyeDissipation: 0.985,
@@ -30,7 +28,6 @@ const params = {
   speed: 1,
 };
 
-// ===== CRIA OS GRIDS (campos de velocidade e de "tinta") =====
 function makeGrid(n) {
   const g = [];
   for (let y = 0; y < n; y++) g.push(new Array(n).fill(0));
@@ -43,11 +40,8 @@ let dyeR = makeGrid(GRID);
 let dyeG = makeGrid(GRID);
 let dyeB = makeGrid(GRID);
 
-// ===== GPU.js: os cálculos pesados (por célula, em paralelo) =====
 const gpu = new GPU();
 
-// Espalha uma quantidade (velocidade ou cor) num raio ao redor de
-// um ponto — usado toda vez que você clica/arrasta na tela.
 const splatKernel = gpu.createKernel(function (field, px, py, radius, amount) {
   const dx = this.thread.x - px;
   const dy = this.thread.y - py;
@@ -56,9 +50,6 @@ const splatKernel = gpu.createKernel(function (field, px, py, radius, amount) {
   return field[this.thread.y][this.thread.x] + amount * falloff;
 }).setOutput([GRID, GRID]);
 
-// Advecção semi-Lagrangiana: pra cada célula, "olha pra trás" ao
-// longo do campo de velocidade e pega o valor de lá (com
-// interpolação bilinear) — é isso que cria o movimento de fluido.
 const advectKernel = gpu.createKernel(function (field, velocityX, velocityY, dt, dissipation, gridSize) {
   const x = this.thread.x;
   const y = this.thread.y;
@@ -89,7 +80,6 @@ const advectKernel = gpu.createKernel(function (field, velocityX, velocityY, dt,
   return (top * (1 - sy) + bottom * sy) * dissipation;
 }).setOutput([GRID, GRID]);
 
-// ===== INTERAÇÃO COM O MOUSE/TOQUE =====
 let pointerActive = false;
 let lastGX = 0;
 let lastGY = 0;
@@ -157,7 +147,6 @@ canvas.addEventListener('pointerdown', (e) => {
 canvas.addEventListener('pointermove', (e) => pointerMove(e.clientX, e.clientY));
 window.addEventListener('pointerup', () => { pointerActive = false; });
 
-// ===== LOOP PRINCIPAL =====
 let lastTime = performance.now();
 
 function step(dt) {
@@ -199,7 +188,6 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-// ===== PAINEL TWEAKPANE =====
 function setupPanel() {
   const pane = new TweakpaneModule.Pane({ container: document.getElementById('fluidPanel'), title: 'Controles do fluido' });
 
@@ -223,7 +211,6 @@ function setupPanel() {
   });
 }
 
-// ===== INÍCIO =====
 setupPanel();
 document.getElementById('fluidLoading').classList.add('hidden');
 document.getElementById('fluidHint').classList.add('visible');
