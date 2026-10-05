@@ -43,7 +43,7 @@ let dyeG = makeGrid(GRID);
 let dyeB = makeGrid(GRID);
 
 // ===== GPU.js: os cálculos pesados (por célula, em paralelo) =====
-const gpu = new GPU.GPU();
+const gpu = new GPU();
 
 // Espalha uma quantidade (velocidade ou cor) num raio ao redor de
 // um ponto — usado toda vez que você clica/arrasta na tela.
