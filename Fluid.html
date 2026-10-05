@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fluid Lab — Safira Wolf Fox</title>
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0410;
+    --panel-bg:rgba(20,10,24,0.85);
+    --panel-border:rgba(255,255,255,0.12);
+    --text:#f3e9f5;
+    --text-muted:rgba(243,233,245,0.65);
+    --accent:#c77dff;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html, body{ height:100%; overflow:hidden; background:var(--bg); }
+  body{
+    font-family:'Poppins', sans-serif;
+    color:var(--text);
+  }
+  canvas{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    cursor:crosshair;
+    touch-action:none;
+  }
+  .fluid-header{
+    position:fixed;
+    top:16px;
+    left:16px;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    pointer-events:none;
+  }
+  .fluid-header a{
+    pointer-events:auto;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    color:var(--text);
+    text-decoration:none;
+    font-size:0.82rem;
+    font-weight:600;
+    padding:8px 14px;
+    border-radius:999px;
+  }
+  .fluid-header a:hover{ background:rgba(199,125,255,0.25); }
+  .fluid-title{
+    font-size:0.78rem;
+    color:var(--text-muted);
+    pointer-events:none;
+  }
+  .fluid-hint{
+    position:fixed;
+    bottom:16px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:20;
+    font-size:0.78rem;
+    color:var(--text-muted);
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    padding:8px 16px;
+    border-radius:999px;
+    opacity:0;
+    transition:opacity 0.4s ease;
+    pointer-events:none;
+    text-align:center;
+  }
+  .fluid-hint.visible{ opacity:1; }
+  .fluid-loading{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:10px;
+    z-index:30;
+    background:var(--bg);
+    font-size:0.9rem;
+    color:var(--text-muted);
+    transition:opacity 0.4s ease;
+  }
+  .fluid-loading.hidden{ opacity:0; pointer-events:none; }
+  .fluid-spinner{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,0.15);
+    border-top-color:var(--accent);
+    animation:fluid-spin 0.8s linear infinite;
+  }
+  @keyframes fluid-spin{ to{ transform:rotate(360deg); } }
+
+  /* Tweakpane herda a fonte do navegador por padrão — deixa ele no
+     canto e com um visual discreto que combina com o resto */
+  #fluidPanel{
+    position:fixed;
+    top:16px;
+    right:16px;
+    z-index:20;
+    width:260px;
+  }
+</style>
+</head>
+<body>
+
+<div class="fluid-loading" id="fluidLoading">
+  <div class="fluid-spinner"></div>
+  <span>Carregando o laboratório de fluido...</span>
+</div>
+
+<canvas id="fluidCanvas"></canvas>
+
+<div class="fluid-header">
+  <a href="index.html">← Voltar ao site</a>
+  <span class="fluid-title">Fluid Lab</span>
+</div>
+
+<div class="fluid-hint" id="fluidHint">Clique e arraste na tela — mexa no painel ao lado pra ajustar o fluido</div>
+
+<div id="fluidPanel"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/gpu.js@2.17.1/dist/gpu-browser.min.js"></script>
+<script type="module" src="js/fluid.js"></script>
+</body>
+</html>
