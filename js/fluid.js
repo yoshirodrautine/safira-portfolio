@@ -2,7 +2,7 @@ import * as TweakpaneModule from 'https://unpkg.com/tweakpane@4.0.1/dist/tweakpa
 import GPU from 'https://esm.sh/gpu.js';
 
 // ===== CONFIGURAÇÃO BÁSICA =====
-const GRID = 96; // resolução interna da simulação (não é o tamanho da tela)
+const GRID = 512; // resolução interna da simulação (não é o tamanho da tela)
 const canvas = document.getElementById('fluidCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = true;
