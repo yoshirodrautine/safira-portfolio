@@ -1,4 +1,5 @@
 import * as TweakpaneModule from 'https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js';
+import { GPU } from 'https://esm.sh/gpu.js'; // Importação direta como módulo ES
 
 // ===== CONFIGURAÇÃO BÁSICA =====
 const GRID = 96; // resolução interna da simulação (não é o tamanho da tela)
