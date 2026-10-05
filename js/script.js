@@ -295,8 +295,15 @@ function showKonamiTerminal(heroImg) {
   requestAnimationFrame(() => terminal.classList.add('visible'));
 
   input.addEventListener('input', () => {
-    if (input.value.trim().toLowerCase() === 'gravity') {
+    const value = input.value.trim().toLowerCase();
+    if (value === 'gravity') {
       triggerKonami();
+    } else if (value === 'fluid') {
+      // abre numa aba nova de propósito — é uma simulação WebGL
+      // bem mais pesada, não faz sentido rodar em cima do site
+      window.open('fluid.html', '_blank', 'noopener');
+      terminal.classList.remove('visible');
+      setTimeout(() => terminal.remove(), 300);
     }
   });
 
