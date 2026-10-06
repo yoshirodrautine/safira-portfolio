@@ -18,54 +18,55 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'Poppins', sans-serif; color: var(--text); }
   
-  /* Canvas do Fluido: Fica no fundo */
-  #fluidCanvas {
+  /* O script do Pavel vai capturar este canvas automaticamente */
+  canvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     z-index: 1;
-    touch-action: none; /* Essencial para evitar scroll no telemóvel ao arrastar */
   }
   
-  /* Camada da Interface: Fica por cima, mas deixa os cliques vazarem pro Canvas */
-  .ui-layer {
-    position: fixed;
-    inset: 0;
-    z-index: 20;
+  /* Interface do seu site (Camada transparente para os cliques passarem pro fluido) */
+  .ui-layer { 
+    position: absolute; 
+    inset: 0; 
+    z-index: 20; 
     pointer-events: none; 
   }
-
-  /* Elementos específicos da Interface: Voltam a aceitar cliques */
-  .fluid-header, .fluid-hint, #fluidPanel {
-    pointer-events: auto; 
-    position: absolute;
-  }
-
-  .fluid-header { top: 16px; left: 16px; display: flex; gap: 10px; }
-  .fluid-header a { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text); text-decoration: none; font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; }
+  
+  /* Botões e textos voltam a ser clicáveis/visíveis */
+  .fluid-header { position: absolute; top: 16px; left: 16px; display: flex; gap: 10px; pointer-events: auto; }
+  .fluid-header a { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text); text-decoration: none; font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; transition: background 0.2s; }
   .fluid-header a:hover { background: rgba(199,125,255,0.25); }
   .fluid-title { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; }
   
-  .fluid-hint { bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 0.78rem; color: var(--text-muted); background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 8px 16px; border-radius: 999px; }
+  .fluid-hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 0.78rem; color: var(--text-muted); background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 8px 16px; border-radius: 999px; }
   
-  #fluidPanel { top: 16px; right: 16px; width: 260px; }
+  /* Ajusta a posição do painel original do site para não colar no topo */
+  .dg.ac { top: 16px !important; right: 16px !important; z-index: 30 !important; }
 </style>
 </head>
 <body>
 
-<canvas id="fluidCanvas"></canvas>
+<!-- O canvas puro -->
+<canvas></canvas>
 
+<!-- A sua interface customizada -->
 <div class="ui-layer">
   <div class="fluid-header">
     <a href="index.html">← Voltar ao site</a>
     <span class="fluid-title">Fluid Lab</span>
   </div>
-  <div class="fluid-hint">Clique e arraste na tela — mexa no painel para ajustar</div>
-  <div id="fluidPanel"></div>
+  <div class="fluid-hint">Clique e arraste na tela — use o painel original à direita</div>
 </div>
 
-<script type="module" src="js/fluid.js"></script>
+<!-- 1. Carrega a biblioteca de interface usada pelo Pavel (dat.gui) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
+
+<!-- 2. Carrega o script exato do repositório oficial do WebGL-Fluid-Simulation -->
+<script src="https://cdn.jsdelivr.net/gh/PavelDoGreat/WebGL-Fluid-Simulation@master/script.js"></script>
+
 </body>
 </html>
