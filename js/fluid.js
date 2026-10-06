@@ -15,13 +15,14 @@ const params = {
   splatForce: 6000,
   shading: true,
   colorful: true,
-  color: '#c77dff', // A sua cor tema
+  color: '#c77dff',
   bloom: true,
   bloomIntensity: 0.8,
   bloomThreshold: 0.6,
   sunrays: true,
   sunraysWeight: 1.0,
-  backgroundColor: '#0c0410'
+  backgroundColor: '#0c0410',
+  hover: true // <-- CRUCIAL: Mantém o motor atento aos movimentos
 };
 
 // 2. INICIA O MOTOR
@@ -30,16 +31,27 @@ simulation.setConfig(params);
 simulation.start();
 
 // ===== MODO CLIQUE E ARRASTE =====
+// Começa com o traço a zero (invisível)
 simulation.setConfig({ splatRadius: 0 });
 let isDragging = false;
 
 window.addEventListener('pointerdown', (e) => {
-  if (e.target !== canvas) return;
+  // Se estiver a clicar no painel Tweakpane ou num botão, ignora
+  if (e.target.tagName !== 'CANVAS') return;
+  
   isDragging = true;
+  // Restaura o tamanho do traço definido nos parâmetros
   simulation.setConfig({ splatRadius: params.splatRadius });
 });
 
 window.addEventListener('pointerup', () => {
+  isDragging = false;
+  // Volta a esconder o traço
+  simulation.setConfig({ splatRadius: 0 });
+});
+
+// Para evitar que o fluido fique "preso" se o rato sair da janela
+window.addEventListener('pointercancel', () => {
   isDragging = false;
   simulation.setConfig({ splatRadius: 0 });
 });
@@ -52,6 +64,7 @@ const pane = new TweakpaneModule.Pane({
 
 const applyChanges = () => {
   const currentParams = { ...params };
+  // Se não estiver a arrastar, mantém o raio a zero para não desenhar sem clique
   if (!isDragging) {
     currentParams.splatRadius = 0;
   }
