@@ -3,7 +3,7 @@ import WebGLFluid from 'https://esm.sh/webgl-fluid-enhanced';
 
 const canvas = document.getElementById('fluidCanvas');
 
-// 1. Objeto com TODAS as configurações do site original
+// 1. CONFIGURAÇÕES
 const params = {
   simResolution: 128,
   dyeResolution: 512,
@@ -20,22 +20,40 @@ const params = {
   bloomThreshold: 0.6,
   sunrays: true,
   sunraysWeight: 1.0,
-  hover: false, // false = o fluido só sai quando clica e arrasta
-  backgroundColor: '#0c0410' // Combina com o fundo do seu CSS
+  hover: true, // DEVE SER TRUE para o motor aceitar interação
+  backgroundColor: '#0c0410'
 };
 
-// 2. Inicia o motor WebGL Enhanced
 const simulation = new WebGLFluid(canvas);
 simulation.setConfig(params);
 simulation.start();
 
-// 3. Painel Tweakpane (Visual completo)
+// ===== O TRUQUE: MODO CLIQUE E ARRASTE =====
+// Bloqueia o rastro do rato na GPU a não ser que esteja a clicar
+let isDragging = false;
+
+window.addEventListener('pointerdown', () => { isDragging = true; }, true);
+window.addEventListener('pointerup', () => { isDragging = false; }, true);
+
+window.addEventListener('mousemove', (e) => {
+  if (e.target === canvas && !isDragging) {
+    e.stopPropagation(); // Trava a comunicação com o WebGL se não estiver a clicar
+  }
+}, true);
+
+window.addEventListener('touchmove', (e) => {
+  if (e.target === canvas && !isDragging) {
+    e.stopPropagation();
+  }
+}, true);
+// ============================================
+
+// 3. PAINEL TWEAKPANE
 const pane = new TweakpaneModule.Pane({
   container: document.getElementById('fluidPanel'),
   title: 'Controles do Fluido'
 });
 
-// Função universal para injetar qualquer mudança instantaneamente no WebGL
 const applyChanges = () => {
   simulation.setConfig(params);
 };
@@ -62,7 +80,6 @@ fQualidade.addBinding(params, 'curl', { label: 'Redemoinhos', min: 0, max: 50 })
 const fTraco = pane.addFolder({ title: 'Comportamento' });
 fTraco.addBinding(params, 'splatRadius', { label: 'Tamanho', min: 0.01, max: 1.0 }).on('change', applyChanges);
 fTraco.addBinding(params, 'splatForce', { label: 'Força', min: 1000, max: 10000 }).on('change', applyChanges);
-fTraco.addBinding(params, 'hover', { label: 'Reagir sem clicar' }).on('change', applyChanges);
 fTraco.addBinding(params, 'colorful', { label: 'Multicolorido' }).on('change', applyChanges);
 
 // --- PASTA: EFEITOS VISUAIS ---
