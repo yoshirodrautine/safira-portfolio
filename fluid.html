@@ -8,53 +8,63 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0c0410;
-    --panel-bg:rgba(20,10,24,0.85);
-    --panel-border:rgba(255,255,255,0.12);
-    --text:#f3e9f5;
-    --text-muted:rgba(243,233,245,0.65);
-    --accent:#c77dff;
+  :root {
+    --bg: #0c0410;
+    --panel-bg: rgba(20,10,24,0.85);
+    --panel-border: rgba(255,255,255,0.12);
+    --text: #f3e9f5;
+    --text-muted: rgba(243,233,245,0.65);
   }
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html, body{ height:100%; overflow:hidden; background:var(--bg); }
-  body{ font-family:'Poppins', sans-serif; color:var(--text); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'Poppins', sans-serif; color: var(--text); }
   
-  /* O canvas será criado automaticamente pelo script do webgl-fluid e ficará no fundo */
-  canvas {
+  /* Canvas do Fluido: Fica no fundo */
+  #fluidCanvas {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 1; /* Fica atrás da UI */
+    z-index: 1;
+    touch-action: none; /* Essencial para evitar scroll no telemóvel ao arrastar */
+  }
+  
+  /* Camada da Interface: Fica por cima, mas deixa os cliques vazarem pro Canvas */
+  .ui-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    pointer-events: none; 
   }
 
+  /* Elementos específicos da Interface: Voltam a aceitar cliques */
   .fluid-header, .fluid-hint, #fluidPanel {
-    z-index: 20;
-    position: relative;
+    pointer-events: auto; 
+    position: absolute;
   }
+
+  .fluid-header { top: 16px; left: 16px; display: flex; gap: 10px; }
+  .fluid-header a { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text); text-decoration: none; font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; }
+  .fluid-header a:hover { background: rgba(199,125,255,0.25); }
+  .fluid-title { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; }
   
-  .fluid-header{ position:fixed; top:16px; left:16px; display:flex; gap:10px; pointer-events:none; }
-  .fluid-header a{ pointer-events:auto; display:inline-flex; align-items:center; gap:6px; background:var(--panel-bg); border:1px solid var(--panel-border); color:var(--text); text-decoration:none; font-size:0.82rem; font-weight:600; padding:8px 14px; border-radius:999px; }
-  .fluid-header a:hover{ background:rgba(199,125,255,0.25); }
-  .fluid-title{ font-size:0.78rem; color:var(--text-muted); pointer-events:none; display:flex; align-items:center;}
+  .fluid-hint { bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 0.78rem; color: var(--text-muted); background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 8px 16px; border-radius: 999px; }
   
-  .fluid-hint{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%); font-size:0.78rem; color:var(--text-muted); background:var(--panel-bg); border:1px solid var(--panel-border); padding:8px 16px; border-radius:999px; pointer-events:none; }
-  
-  #fluidPanel{ position:fixed; top:16px; right:16px; width:260px; }
+  #fluidPanel { top: 16px; right: 16px; width: 260px; }
 </style>
 </head>
 <body>
+
 <canvas id="fluidCanvas"></canvas>
 
-<div class="fluid-header">
-  <a href="index.html">← Voltar</a>
-  <span class="fluid-title">Fluid Lab</span>
+<div class="ui-layer">
+  <div class="fluid-header">
+    <a href="index.html">← Voltar ao site</a>
+    <span class="fluid-title">Fluid Lab</span>
+  </div>
+  <div class="fluid-hint">Clique e arraste na tela — mexa no painel para ajustar</div>
+  <div id="fluidPanel"></div>
 </div>
-
-<div class="fluid-hint">Clique e arraste na tela — mexa no painel ao lado para ajustar</div>
-<div id="fluidPanel"></div>
 
 <script type="module" src="js/fluid.js"></script>
 </body>
