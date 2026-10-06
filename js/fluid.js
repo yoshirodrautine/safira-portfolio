@@ -1,5 +1,5 @@
 import * as TweakpaneModule from 'https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js';
-import fluid from 'https://cdn.jsdelivr.net/npm/webgl-fluid@0.0.18/+esm';
+import fluid from 'https://esm.sh/webgl-fluid';
 
 // ===== INICIALIZAÇÃO DO FLUIDO WEBGL =====
 // O motor cria o canvas automaticamente e o anexa ao document.body
