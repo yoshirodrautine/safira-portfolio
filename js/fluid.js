@@ -22,7 +22,7 @@ const params = {
   sunrays: true,
   sunraysWeight: 1.0,
   backgroundColor: '#0c0410',
-  hover: true // <-- CRUCIAL: Mantém o motor atento aos movimentos
+  hover: true // Fundamental manter ativado para a biblioteca funcionar
 };
 
 // 2. INICIA O MOTOR
@@ -30,31 +30,30 @@ const simulation = new WebGLFluid(canvas);
 simulation.setConfig(params);
 simulation.start();
 
-// ===== MODO CLIQUE E ARRASTE =====
-// Começa com o traço a zero (invisível)
-simulation.setConfig({ splatRadius: 0 });
+// ===== MODO CLIQUE E ARRASTE (NOVA LÓGICA) =====
 let isDragging = false;
 
-window.addEventListener('pointerdown', (e) => {
-  // Se estiver a clicar no painel Tweakpane ou num botão, ignora
-  if (e.target.tagName !== 'CANVAS') return;
-  
+window.addEventListener('pointerdown', () => {
   isDragging = true;
-  // Restaura o tamanho do traço definido nos parâmetros
-  simulation.setConfig({ splatRadius: params.splatRadius });
 });
 
 window.addEventListener('pointerup', () => {
   isDragging = false;
-  // Volta a esconder o traço
-  simulation.setConfig({ splatRadius: 0 });
 });
 
-// Para evitar que o fluido fique "preso" se o rato sair da janela
-window.addEventListener('pointercancel', () => {
-  isDragging = false;
-  simulation.setConfig({ splatRadius: 0 });
-});
+// Esta função interceta os movimentos do rato. 
+// Se o botão não estiver pressionado, ela impede que o movimento chegue à simulação.
+const blockHoverEvents = (e) => {
+  if (!isDragging && e.target === canvas) {
+    e.stopPropagation();
+  }
+};
+
+// Aplica o bloqueio usando a fase de captura (o 'true' no final)
+window.addEventListener('pointermove', blockHoverEvents, true);
+window.addEventListener('mousemove', blockHoverEvents, true);
+window.addEventListener('touchmove', blockHoverEvents, true);
+// ===============================================
 
 // 3. PAINEL TWEAKPANE
 const pane = new TweakpaneModule.Pane({
@@ -63,12 +62,7 @@ const pane = new TweakpaneModule.Pane({
 });
 
 const applyChanges = () => {
-  const currentParams = { ...params };
-  // Se não estiver a arrastar, mantém o raio a zero para não desenhar sem clique
-  if (!isDragging) {
-    currentParams.splatRadius = 0;
-  }
-  simulation.setConfig(currentParams);
+  simulation.setConfig(params);
 };
 
 // --- PASTA: FÍSICA E QUALIDADE ---
