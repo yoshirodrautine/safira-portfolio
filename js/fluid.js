@@ -7,7 +7,7 @@ const canvas = document.getElementById('fluidCanvas');
 // Inicia o motor de fluido passando o canvas correto
 const fluidSimulation = fluid(canvas, {
   IMMEDIATE: true,
-  TRIGGER: 'hover',
+  TRIGGER: 'click',
   SIM_RESOLUTION: 128,
   DYE_RESOLUTION: 512,
   DENSITY_DISSIPATION: 0.98,
