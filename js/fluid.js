@@ -1,23 +1,25 @@
 import * as TweakpaneModule from 'https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js';
 import fluid from 'https://esm.sh/webgl-fluid';
 
-// ===== INICIALIZAÇÃO DO FLUIDO WEBGL =====
-// O motor cria o canvas automaticamente e o anexa ao document.body
-const fluidSimulation = fluid(document.body, {
+// Busca o canvas que acabamos de adicionar no HTML
+const canvas = document.getElementById('fluidCanvas');
+
+// Inicia o motor de fluido passando o canvas correto
+const fluidSimulation = fluid(canvas, {
   IMMEDIATE: true,
-  TRIGGER: 'hover', // Reage tanto ao clique quanto ao passar do mouse
+  TRIGGER: 'hover',
   SIM_RESOLUTION: 128,
-  DYE_RESOLUTION: 512, // Alta qualidade visual
+  DYE_RESOLUTION: 512,
   DENSITY_DISSIPATION: 0.98,
   VELOCITY_DISSIPATION: 0.99,
   PRESSURE: 0.8,
   PRESSURE_ITERATIONS: 20,
-  CURL: 30, // Intensidade dos redemoinhos
-  SPLAT_RADIUS: 0.35, // Tamanho do traço
+  CURL: 30,
+  SPLAT_RADIUS: 0.35,
   COLOR_UPDATE_SPEED: 10,
-  BACK_COLOR: { r: 12, g: 4, b: 16 }, // Cor de fundo (combina com o #0c0410 do CSS)
+  BACK_COLOR: { r: 12, g: 4, b: 16 },
   TRANSPARENT: false,
-  BLOOM: true, // Efeito de brilho neon
+  BLOOM: true,
   BLOOM_ITERATIONS: 8,
   BLOOM_RESOLUTION: 256,
   BLOOM_INTENSITY: 0.8,
