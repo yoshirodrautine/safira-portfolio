@@ -3,7 +3,7 @@ import WebGLFluid from 'https://esm.sh/webgl-fluid-enhanced';
 
 const canvas = document.getElementById('fluidCanvas');
 
-// 1. CONFIGURAÇÕES
+// 1. CONFIGURAÇÕES BASE
 const params = {
   simResolution: 128,
   dyeResolution: 512,
@@ -20,33 +20,32 @@ const params = {
   bloomThreshold: 0.6,
   sunrays: true,
   sunraysWeight: 1.0,
-  hover: true, // DEVE SER TRUE para o motor aceitar interação
   backgroundColor: '#0c0410'
 };
 
+// 2. INICIA O MOTOR
 const simulation = new WebGLFluid(canvas);
 simulation.setConfig(params);
 simulation.start();
 
-// ===== O TRUQUE: MODO CLIQUE E ARRASTE =====
-// Bloqueia o rastro do rato na GPU a não ser que esteja a clicar
+// ===== A SOLUÇÃO ELEGANTE PARA "CLIQUE E ARRASTE" =====
+// Esconde o traço por padrão
+simulation.setConfig({ splatRadius: 0 });
 let isDragging = false;
 
-window.addEventListener('pointerdown', () => { isDragging = true; }, true);
-window.addEventListener('pointerup', () => { isDragging = false; }, true);
+// Quando clica, restaura o tamanho original do painel
+window.addEventListener('pointerdown', (e) => {
+  if (e.target !== canvas) return; // Ignora cliques no painel
+  isDragging = true;
+  simulation.setConfig({ splatRadius: params.splatRadius });
+});
 
-window.addEventListener('mousemove', (e) => {
-  if (e.target === canvas && !isDragging) {
-    e.stopPropagation(); // Trava a comunicação com o WebGL se não estiver a clicar
-  }
-}, true);
-
-window.addEventListener('touchmove', (e) => {
-  if (e.target === canvas && !isDragging) {
-    e.stopPropagation();
-  }
-}, true);
-// ============================================
+// Quando solta, zera o tamanho do traço novamente
+window.addEventListener('pointerup', () => {
+  isDragging = false;
+  simulation.setConfig({ splatRadius: 0 });
+});
+// =======================================================
 
 // 3. PAINEL TWEAKPANE
 const pane = new TweakpaneModule.Pane({
@@ -54,8 +53,13 @@ const pane = new TweakpaneModule.Pane({
   title: 'Controles do Fluido'
 });
 
+// Atualiza o motor, respeitando se está a clicar ou não
 const applyChanges = () => {
-  simulation.setConfig(params);
+  const currentParams = { ...params };
+  if (!isDragging) {
+    currentParams.splatRadius = 0; // Mantém invisível se não estiver a arrastar
+  }
+  simulation.setConfig(currentParams);
 };
 
 // --- PASTA: QUALIDADE E FÍSICA ---
@@ -91,4 +95,4 @@ fVisual.addBinding(params, 'bloomIntensity', { label: 'Intensidade Neon', min: 0
 fVisual.addBinding(params, 'bloomThreshold', { label: 'Limite Neon', min: 0.0, max: 1.0 }).on('change', applyChanges);
 
 fVisual.addBinding(params, 'sunrays', { label: 'Raios de Luz' }).on('change', applyChanges);
-fVisual.addBinding(params, 'sunraysWeight', { label: 'Força da Luz', min: 0.1, max: 2.0 }).on('change', applyChanges);
+fVisual.addBinding(params, 'sunraysWeight', { label: 'Força da Luz', min: 0.1, max: 2.0 }).on('
