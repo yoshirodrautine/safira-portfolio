@@ -15,6 +15,7 @@ const params = {
   splatForce: 6000,
   shading: true,
   colorful: true,
+  color: '#c77dff', // A sua cor tema
   bloom: true,
   bloomIntensity: 0.8,
   bloomThreshold: 0.6,
@@ -28,24 +29,20 @@ const simulation = new WebGLFluid(canvas);
 simulation.setConfig(params);
 simulation.start();
 
-// ===== A SOLUÇÃO ELEGANTE PARA "CLIQUE E ARRASTE" =====
-// Esconde o traço por padrão
+// ===== MODO CLIQUE E ARRASTE =====
 simulation.setConfig({ splatRadius: 0 });
 let isDragging = false;
 
-// Quando clica, restaura o tamanho original do painel
 window.addEventListener('pointerdown', (e) => {
-  if (e.target !== canvas) return; // Ignora cliques no painel
+  if (e.target !== canvas) return;
   isDragging = true;
   simulation.setConfig({ splatRadius: params.splatRadius });
 });
 
-// Quando solta, zera o tamanho do traço novamente
 window.addEventListener('pointerup', () => {
   isDragging = false;
   simulation.setConfig({ splatRadius: 0 });
 });
-// =======================================================
 
 // 3. PAINEL TWEAKPANE
 const pane = new TweakpaneModule.Pane({
@@ -53,28 +50,18 @@ const pane = new TweakpaneModule.Pane({
   title: 'Controles do Fluido'
 });
 
-// Atualiza o motor, respeitando se está a clicar ou não
 const applyChanges = () => {
   const currentParams = { ...params };
   if (!isDragging) {
-    currentParams.splatRadius = 0; // Mantém invisível se não estiver a arrastar
+    currentParams.splatRadius = 0;
   }
   simulation.setConfig(currentParams);
 };
 
-// --- PASTA: QUALIDADE E FÍSICA ---
+// --- PASTA: FÍSICA E QUALIDADE ---
 const fQualidade = pane.addFolder({ title: 'Física e Qualidade' });
-
-fQualidade.addBinding(params, 'simResolution', {
-  label: 'Res. Simulação',
-  options: { Baixa: 64, Média: 128, Alta: 256, Ultra: 512 }
-}).on('change', applyChanges);
-
-fQualidade.addBinding(params, 'dyeResolution', {
-  label: 'Res. Textura',
-  options: { Baixa: 256, Média: 512, Alta: 1024 }
-}).on('change', applyChanges);
-
+fQualidade.addBinding(params, 'simResolution', { label: 'Res. Simulação', options: { Baixa: 64, Média: 128, Alta: 256, Ultra: 512 } }).on('change', applyChanges);
+fQualidade.addBinding(params, 'dyeResolution', { label: 'Res. Textura', options: { Baixa: 256, Média: 512, Alta: 1024 } }).on('change', applyChanges);
 fQualidade.addBinding(params, 'densityDissipation', { label: 'Fade da Cor', min: 0.9, max: 1.0, step: 0.001 }).on('change', applyChanges);
 fQualidade.addBinding(params, 'velocityDissipation', { label: 'Fade Movimento', min: 0.9, max: 1.0, step: 0.001 }).on('change', applyChanges);
 fQualidade.addBinding(params, 'pressure', { label: 'Pressão', min: 0.0, max: 1.0 }).on('change', applyChanges);
@@ -85,14 +72,13 @@ const fTraco = pane.addFolder({ title: 'Comportamento' });
 fTraco.addBinding(params, 'splatRadius', { label: 'Tamanho', min: 0.01, max: 1.0 }).on('change', applyChanges);
 fTraco.addBinding(params, 'splatForce', { label: 'Força', min: 1000, max: 10000 }).on('change', applyChanges);
 fTraco.addBinding(params, 'colorful', { label: 'Multicolorido' }).on('change', applyChanges);
+fTraco.addBinding(params, 'color', { label: 'Cor Fixa' }).on('change', applyChanges);
 
 // --- PASTA: EFEITOS VISUAIS ---
 const fVisual = pane.addFolder({ title: 'Efeitos Visuais' });
 fVisual.addBinding(params, 'shading', { label: 'Sombreamento 3D' }).on('change', applyChanges);
-
 fVisual.addBinding(params, 'bloom', { label: 'Brilho Neon' }).on('change', applyChanges);
 fVisual.addBinding(params, 'bloomIntensity', { label: 'Intensidade Neon', min: 0.1, max: 2.0 }).on('change', applyChanges);
 fVisual.addBinding(params, 'bloomThreshold', { label: 'Limite Neon', min: 0.0, max: 1.0 }).on('change', applyChanges);
-
 fVisual.addBinding(params, 'sunrays', { label: 'Raios de Luz' }).on('change', applyChanges);
-fVisual.addBinding(params, 'sunraysWeight', { label: 'Força da Luz', min: 0.1, max: 2.0 }).on('
+fVisual.addBinding(params, 'sunraysWeight', { label: 'Força da Luz', min: 0.1, max: 2.0 }).on('change', applyChanges);
