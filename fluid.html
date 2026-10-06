@@ -18,7 +18,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: 'Poppins', sans-serif; color: var(--text); }
   
-  /* O script do Pavel vai capturar este canvas automaticamente */
+  /* O canvas precisa existir puramente para o script do Pavel o sequestrar */
   canvas {
     position: fixed;
     top: 0;
@@ -28,7 +28,7 @@
     z-index: 1;
   }
   
-  /* Interface do seu site (Camada transparente para os cliques passarem pro fluido) */
+  /* Nossa interface sobreposta que não bloqueia os cliques do fluido */
   .ui-layer { 
     position: absolute; 
     inset: 0; 
@@ -36,36 +36,45 @@
     pointer-events: none; 
   }
   
-  /* Botões e textos voltam a ser clicáveis/visíveis */
   .fluid-header { position: absolute; top: 16px; left: 16px; display: flex; gap: 10px; pointer-events: auto; }
-  .fluid-header a { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text); text-decoration: none; font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; transition: background 0.2s; }
+  .fluid-header a { display: inline-flex; align-items: center; gap: 6px; background: var(--panel-bg); border: 1px solid var(--panel-border); color: var(--text); text-decoration: none; font-size: 0.82rem; font-weight: 600; padding: 8px 14px; border-radius: 999px; }
   .fluid-header a:hover { background: rgba(199,125,255,0.25); }
   .fluid-title { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; }
   
   .fluid-hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); font-size: 0.78rem; color: var(--text-muted); background: var(--panel-bg); border: 1px solid var(--panel-border); padding: 8px 16px; border-radius: 999px; }
   
-  /* Ajusta a posição do painel original do site para não colar no topo */
+  /* Posiciona o painel nativo da simulação para a direita da tela */
   .dg.ac { top: 16px !important; right: 16px !important; z-index: 30 !important; }
 </style>
 </head>
 <body>
 
-<!-- O canvas puro -->
 <canvas></canvas>
 
-<!-- A sua interface customizada -->
 <div class="ui-layer">
   <div class="fluid-header">
     <a href="index.html">← Voltar ao site</a>
     <span class="fluid-title">Fluid Lab</span>
   </div>
-  <div class="fluid-hint">Clique e arraste na tela — use o painel original à direita</div>
+  <div class="fluid-hint">Clique e arraste na tela — use o painel original à direita para ajustar</div>
 </div>
 
-<!-- 1. Carrega a biblioteca de interface usada pelo Pavel (dat.gui) -->
+<!-- ELEMENTOS FANTASMAS: O segredo para o script original não dar erro -->
+<div style="display: none;">
+  <div class="promo"></div>
+  <div class="promo-button"></div>
+  <div class="promo-close"></div>
+  <div class="promo-link apple"></div>
+  <div class="promo-link google"></div>
+  <div class="mac-links"></div>
+  <div class="github"></div>
+  <div class="resolution"></div>
+</div>
+
+<!-- 1. Painel dat.gui idêntico ao do site -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.6/dat.gui.min.js"></script>
 
-<!-- 2. Carrega o script exato do repositório oficial do WebGL-Fluid-Simulation -->
+<!-- 2. Código oficial, sem modificações -->
 <script src="https://cdn.jsdelivr.net/gh/PavelDoGreat/WebGL-Fluid-Simulation@master/script.js"></script>
 
 </body>
