@@ -1,19 +1,41 @@
-import * as TweakpaneModule from 'https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js';
-import webGLFluidEnhanced from 'https://esm.run/webgl-fluid-enhanced';
-
 const canvas = document.getElementById('fluidCanvas');
 const loading = document.getElementById('fluidLoading');
 const hint = document.getElementById('fluidHint');
 
-// ===== CONFIGURAÇÃO INICIAL =====
-// Chaves confirmadas na documentação oficial da biblioteca — duas
-// coisas que corrigi aqui: IMMEDIATE/TRIGGER não existem nessa API
-// (virou INITIAL + HOVER), e BACK_COLOR espera uma cor em hexadecimal
-// (texto), não um objeto {r,g,b}.
+// Em vez de deixar o spinner girando pra sempre quando algo falha,
+// troca o texto da tela de carregamento por uma mensagem de erro.
+function showError(message, detail) {
+  const spinner = loading.querySelector('.fluid-spinner');
+  const text = loading.querySelector('span');
+  if (spinner) spinner.style.display = 'none';
+  text.textContent = message;
+
+  if (detail) {
+    const small = document.createElement('small');
+    small.style.cssText = 'display:block;margin-top:6px;opacity:0.7;font-size:0.75rem;max-width:80vw;text-align:center;';
+    small.textContent = detail;
+    text.appendChild(small);
+  }
+
+  const back = document.createElement('a');
+  back.href = 'index.html';
+  back.textContent = '← Voltar ao site';
+  back.style.cssText = 'color:#c77dff;font-size:0.85rem;margin-top:8px;';
+  loading.appendChild(back);
+}
+
+// Dependendo de como o CDN (esm.run) empacota o pacote, o objeto da
+// biblioteca pode chegar direto, dentro de ".default", ou até dentro
+// de ".default.default". Procura em todos os lugares possíveis.
+function resolveFluidLib(mod) {
+  const candidates = [mod, mod && mod.default, mod && mod.default && mod.default.default];
+  return candidates.find((c) => c && typeof c.simulation === 'function') || null;
+}
+
 const initialConfig = {
   INITIAL: true,
   SPLAT_AMOUNT: 5,
-  HOVER: false, // false = reage a clique/arrasto, não só passar o mouse
+  HOVER: false,
   SIM_RESOLUTION: 128,
   DYE_RESOLUTION: 512,
   DENSITY_DISSIPATION: 0.98,
@@ -33,53 +55,78 @@ const initialConfig = {
   BLOOM_SOFT_KNEE: 0.7,
 };
 
-webGLFluidEnhanced.simulation(canvas, initialConfig);
+async function setupPanel(lib) {
+  let TweakpaneModule;
+  try {
+    TweakpaneModule = await import('https://unpkg.com/tweakpane@4.0.1/dist/tweakpane.js');
+  } catch (err) {
+    console.warn('Tweakpane não carregou — o fluido segue funcionando sem o painel.', err);
+    return;
+  }
 
-// ===== PAINEL TWEAKPANE =====
-// A versão "enhanced" expõe .config() pra atualizar a simulação já
-// rodando — é isso que faltava antes (a versão sem "enhanced" só
-// lê a configuração uma vez, na inicialização, e ignora qualquer
-// mudança depois disso).
-const params = {
-  radius: initialConfig.SPLAT_RADIUS,
-  curl: initialConfig.CURL,
-  bloom: initialConfig.BLOOM,
-  dissipation: initialConfig.DENSITY_DISSIPATION,
-  velocity: initialConfig.VELOCITY_DISSIPATION,
-};
+  const update = (partial) => {
+    if (typeof lib.config === 'function') lib.config(partial);
+  };
 
-const pane = new TweakpaneModule.Pane({
-  container: document.getElementById('fluidPanel'),
-  title: 'Controles do fluido',
-});
+  const params = {
+    radius: initialConfig.SPLAT_RADIUS,
+    curl: initialConfig.CURL,
+    bloom: initialConfig.BLOOM,
+    dissipation: initialConfig.DENSITY_DISSIPATION,
+    velocity: initialConfig.VELOCITY_DISSIPATION,
+  };
 
-pane.addBinding(params, 'radius', { label: 'Tamanho', min: 0.1, max: 1.0, step: 0.01 }).on('change', (ev) => {
-  webGLFluidEnhanced.config({ SPLAT_RADIUS: ev.value });
-});
+  const pane = new TweakpaneModule.Pane({
+    container: document.getElementById('fluidPanel'),
+    title: 'Controles do fluido',
+  });
 
-pane.addBinding(params, 'curl', { label: 'Redemoinhos', min: 0, max: 50, step: 1 }).on('change', (ev) => {
-  webGLFluidEnhanced.config({ CURL: ev.value });
-});
+  pane.addBinding(params, 'radius', { label: 'Tamanho', min: 0.1, max: 1.0, step: 0.01 })
+    .on('change', (ev) => update({ SPLAT_RADIUS: ev.value }));
+  pane.addBinding(params, 'curl', { label: 'Redemoinhos', min: 0, max: 50, step: 1 })
+    .on('change', (ev) => update({ CURL: ev.value }));
+  pane.addBinding(params, 'dissipation', { label: 'Fade da Cor', min: 0.9, max: 1.0, step: 0.001 })
+    .on('change', (ev) => update({ DENSITY_DISSIPATION: ev.value }));
+  pane.addBinding(params, 'velocity', { label: 'Fade do Movimento', min: 0.9, max: 1.0, step: 0.001 })
+    .on('change', (ev) => update({ VELOCITY_DISSIPATION: ev.value }));
+  pane.addBinding(params, 'bloom', { label: 'Brilho Neon' })
+    .on('change', (ev) => update({ BLOOM: ev.value }));
 
-pane.addBinding(params, 'dissipation', { label: 'Fade da Cor', min: 0.9, max: 1.0, step: 0.001 }).on('change', (ev) => {
-  webGLFluidEnhanced.config({ DENSITY_DISSIPATION: ev.value });
-});
+  pane.addButton({ title: '✨ Novos respingos' }).on('click', () => {
+    if (typeof lib.splats === 'function') lib.splats();
+  });
+}
 
-pane.addBinding(params, 'velocity', { label: 'Fade do Movimento', min: 0.9, max: 1.0, step: 0.001 }).on('change', (ev) => {
-  webGLFluidEnhanced.config({ VELOCITY_DISSIPATION: ev.value });
-});
+async function start() {
+  let mod;
+  try {
+    mod = await import('https://esm.run/webgl-fluid-enhanced');
+  } catch (err) {
+    console.error(err);
+    showError('Não foi possível baixar a biblioteca de fluido.', 'Verifique a conexão e recarregue a página.');
+    return;
+  }
 
-pane.addBinding(params, 'bloom', { label: 'Brilho Neon' }).on('change', (ev) => {
-  webGLFluidEnhanced.config({ BLOOM: ev.value });
-});
+  const lib = resolveFluidLib(mod);
+  if (!lib) {
+    const keys = Object.keys(mod).join(', ') || '(vazio)';
+    const defKeys = mod.default ? Object.keys(mod.default).join(', ') || '(vazio)' : '(sem default)';
+    console.error('Formato inesperado da biblioteca:', mod);
+    showError('A biblioteca carregou, mas num formato inesperado.', `exports: ${keys} | default: ${defKeys}`);
+    return;
+  }
 
-// EDITAR: não existe um método de "limpar tela" nessa biblioteca —
-// trocado por um método que realmente existe: dispara uma nova
-// leva de respingos na tela.
-pane.addButton({ title: '✨ Novos respingos' }).on('click', () => {
-  webGLFluidEnhanced.splats();
-});
+  try {
+    lib.simulation(canvas, initialConfig);
+  } catch (err) {
+    console.error(err);
+    showError('Não foi possível iniciar a simulação.', 'O WebGL pode estar desativado neste navegador.');
+    return;
+  }
 
-// ===== ESCONDE O LOADING =====
-loading.classList.add('hidden');
-hint.classList.add('visible');
+  loading.classList.add('hidden');
+  hint.classList.add('visible');
+  setupPanel(lib);
+}
+
+start();
