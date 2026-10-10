@@ -100,7 +100,10 @@ async function setupPanel(lib) {
 async function start() {
   let mod;
   try {
-    mod = await import('https://esm.run/webgl-fluid-enhanced');
+    // versão fixada em 0.6.1: é a última com a API que usamos aqui
+    // (simulation / config / splats). O @latest virou uma classe
+    // com outra API e quebrava o site.
+    mod = await import('https://esm.run/webgl-fluid-enhanced@0.6.1');
   } catch (err) {
     console.error(err);
     showError('Não foi possível baixar a biblioteca de fluido.', 'Verifique a conexão e recarregue a página.');
